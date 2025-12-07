@@ -200,21 +200,21 @@ app.get("/api/equipment/:id/pdf", async (req, res) => {
 
     console.log("Calling Doppio API for PDF generation...");
 
-    // Use Doppio API for PDF conversion
+    // Use Doppio API for PDF conversion - correct format
     const pdfResponse = await axios.post(
       "https://api.doppio.sh/v1/render/pdf/sync",
       {
         page: {
           html: html,
-          pdf: {
-            format: "Letter",
-            printBackground: true,
-            margin: {
-              top: "0.3in",
-              right: "0.3in",
-              bottom: "0.3in",
-              left: "0.3in",
-            },
+        },
+        pdf: {
+          format: "Letter",
+          printBackground: true,
+          margin: {
+            top: "0.3in",
+            right: "0.3in",
+            bottom: "0.3in",
+            left: "0.3in",
           },
         },
       },
