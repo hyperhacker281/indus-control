@@ -97,13 +97,15 @@ app.get("/api/equipment/:id", async (req, res) => {
 app.post("/api/equipment", async (req, res) => {
   try {
     const equipment = {
-      cr164_equipmentnumber: req.body.equipmentNumber,
-      cr164_equipmentdescription: req.body.description,
-      cr164_location: req.body.location,
-      cr164_manufacturer: req.body.manufacturer,
-      cr164_model: req.body.model,
-      cr164_serialnumber: req.body.serialNumber,
-      cr164_flowrange: req.body.flowRange,
+      cr164_equipmentnumber:
+        req.body.cr164_equipmentnumber || req.body.equipmentNumber,
+      cr164_equipmentdescription:
+        req.body.cr164_equipmentdescription || req.body.description,
+      cr164_location: req.body.cr164_location || req.body.location,
+      cr164_manufacturer: req.body.cr164_manufacturer || req.body.manufacturer,
+      cr164_model: req.body.cr164_model || req.body.model,
+      cr164_serialnumber: req.body.cr164_serialnumber || req.body.serialNumber,
+      cr164_flowrange: req.body.cr164_flowrange || req.body.flowRange,
     };
 
     const result = await queryDataverse("cr164_equipments", "POST", equipment);
@@ -117,13 +119,15 @@ app.post("/api/equipment", async (req, res) => {
 app.patch("/api/equipment/:id", async (req, res) => {
   try {
     const equipment = {
-      cr164_equipmentnumber: req.body.equipmentNumber,
-      cr164_equipmentdescription: req.body.description,
-      cr164_location: req.body.location,
-      cr164_manufacturer: req.body.manufacturer,
-      cr164_model: req.body.model,
-      cr164_serialnumber: req.body.serialNumber,
-      cr164_flowrange: req.body.flowRange,
+      cr164_equipmentnumber:
+        req.body.cr164_equipmentnumber || req.body.equipmentNumber,
+      cr164_equipmentdescription:
+        req.body.cr164_equipmentdescription || req.body.description,
+      cr164_location: req.body.cr164_location || req.body.location,
+      cr164_manufacturer: req.body.cr164_manufacturer || req.body.manufacturer,
+      cr164_model: req.body.cr164_model || req.body.model,
+      cr164_serialnumber: req.body.cr164_serialnumber || req.body.serialNumber,
+      cr164_flowrange: req.body.cr164_flowrange || req.body.flowRange,
     };
 
     await queryDataverse(
