@@ -90,50 +90,55 @@ function EquipmentTable({
                       >
                         ✏️ Edit
                       </button>
-                      <button
-                        className="btn btn-success"
-                        onClick={() =>
-                          onDownloadPDF(
-                            item.cr164_equipmentid,
-                            item.cr164_equipmentnumber
-                          )
-                        }
-                        title="Download PDF Report (HTML Template)"
-                      >
-                        📄 PDF
-                      </button>
-                      <button
-                        className="btn btn-primary"
-                        onClick={() =>
-                          onDownloadWordPDF(
-                            item.cr164_equipmentid,
-                            item.cr164_equipmentnumber
-                          )
-                        }
-                        title="Download PDF from Word Template"
-                        style={{
-                          backgroundColor: "#dc2626",
-                          fontSize: "0.875rem",
-                        }}
-                      >
-                        📕 Word→PDF
-                      </button>
-                      <button
-                        className="btn btn-primary"
-                        onClick={() =>
-                          onDownloadDOCX(
-                            item.cr164_equipmentid,
-                            item.cr164_equipmentnumber
-                          )
-                        }
-                        title="Download Word Report (DOCX Template)"
-                        style={{
-                          backgroundColor: "#2563eb",
-                          fontSize: "0.875rem",
-                        }}
-                      >
-                        📝 Word
-                      </button>
+                      {/* PDF features disabled on Vercel free plan */}
+                      {process.env.NODE_ENV !== "production" && (
+                        <>
+                          <button
+                            className="btn btn-success"
+                            onClick={() =>
+                              onDownloadPDF(
+                                item.cr164_equipmentid,
+                                item.cr164_equipmentnumber
+                              )
+                            }
+                            title="Download PDF Report (HTML Template)"
+                          >
+                            📄 PDF
+                          </button>
+                          <button
+                            className="btn btn-primary"
+                            onClick={() =>
+                              onDownloadWordPDF(
+                                item.cr164_equipmentid,
+                                item.cr164_equipmentnumber
+                              )
+                            }
+                            title="Download PDF from Word Template"
+                            style={{
+                              backgroundColor: "#dc2626",
+                              fontSize: "0.875rem",
+                            }}
+                          >
+                            📕 Word→PDF
+                          </button>
+                          <button
+                            className="btn btn-primary"
+                            onClick={() =>
+                              onDownloadDOCX(
+                                item.cr164_equipmentid,
+                                item.cr164_equipmentnumber
+                              )
+                            }
+                            title="Download Word Report (DOCX Template)"
+                            style={{
+                              backgroundColor: "#2563eb",
+                              fontSize: "0.875rem",
+                            }}
+                          >
+                            📝 Word
+                          </button>
+                        </>
+                      )}
                       <button
                         className="btn btn-delete"
                         onClick={() => onDelete(item.cr164_equipmentid)}
