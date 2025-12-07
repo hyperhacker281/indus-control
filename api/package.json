@@ -4,7 +4,6 @@
     "cors": "^2.8.5",
     "@azure/identity": "^4.0.0",
     "axios": "^1.6.2",
-    "puppeteer": "^21.11.0",
     "handlebars": "^4.7.8"
   }
 }

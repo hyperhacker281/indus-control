@@ -6,7 +6,6 @@ const {
   ClientSecretCredential,
 } = require("@azure/identity");
 const axios = require("axios");
-const puppeteer = require("puppeteer");
 const handlebars = require("handlebars");
 const fs = require("fs");
 const path = require("path");
@@ -158,7 +157,6 @@ app.delete("/api/equipment/:id", async (req, res) => {
 
 // PDF Generation endpoint
 app.get("/api/equipment/:id/pdf", async (req, res) => {
-  let browser = null;
   try {
     // Fetch equipment data
     const result = await queryDataverse(
@@ -200,62 +198,50 @@ app.get("/api/equipment/:id/pdf", async (req, res) => {
     // Generate HTML with data
     const html = template(data);
 
-    // Launch Puppeteer
-    browser = await puppeteer.launch({
-      headless: "new",
-      args: [
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage",
-        "--disable-accelerated-2d-canvas",
-        "--no-first-run",
-        "--no-zygote",
-        "--single-process",
-        "--disable-gpu",
-      ],
-    });
-
-    const page = await browser.newPage();
-
-    // Set content
-    await page.setContent(html, {
-      waitUntil: "domcontentloaded",
-      timeout: 30000,
-    });
-
-    // Generate PDF
-    const pdfBuffer = await page.pdf({
-      format: "Letter",
-      printBackground: true,
-      margin: {
-        top: "0.3in",
-        right: "0.3in",
-        bottom: "0.3in",
-        left: "0.3in",
+    // Use API2PDF free service (no API key needed for basic usage)
+    const pdfResponse = await axios.post(
+      "https://v2018.api2pdf.com/chrome/html",
+      {
+        html: html,
+        inlinePdf: true,
+        fileName: `Equipment_Report_${
+          equipment.cr164_equipmentnumber || req.params.id
+        }.pdf`,
+        options: {
+          landscape: false,
+          printBackground: true,
+          format: "Letter",
+          margin: {
+            top: "0.3in",
+            right: "0.3in",
+            bottom: "0.3in",
+            left: "0.3in",
+          },
+        },
       },
-    });
-
-    await browser.close();
-    browser = null;
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        responseType: "arraybuffer",
+      }
+    );
 
     // Send PDF
     const filename = `Equipment_Report_${
       equipment.cr164_equipmentnumber || req.params.id
     }.pdf`;
     res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Length", pdfBuffer.length);
+    res.setHeader("Content-Length", pdfResponse.data.length);
     res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
-    res.end(pdfBuffer);
+    res.end(Buffer.from(pdfResponse.data));
   } catch (error) {
     console.error("Error generating PDF:", error);
-    if (browser) {
-      try {
-        await browser.close();
-      } catch (e) {
-        console.error("Error closing browser:", e);
-      }
-    }
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      details: error.response?.data?.toString() || "PDF generation failed",
+    });
   }
 });
 
