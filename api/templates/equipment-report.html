@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      Verification Report - Rosemount Electro-Magnetic Flow Measurement
+    </title>
+    <style>
+      @page {
+        size: Letter;
+        margin: 0.3in;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        font-size: 8pt;
+        color: #000;
+        line-height: 1.2;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 2px;
+      }
+
+      td,
+      th {
+        border: 1px solid #000;
+        padding: 3px 5px;
+        vertical-align: top;
+      }
+
+      .header-row {
+        background-color: #d0d0ff;
+        font-weight: bold;
+        text-align: center;
+        padding: 4px;
+      }
+
+      .section-header {
+        background-color: #d0d0ff;
+        font-weight: bold;
+        padding: 4px;
+      }
+
+      .highlight-yellow {
+        background-color: #ffff99;
+      }
+
+      .logo-container {
+        text-align: center;
+        margin-bottom: 10px;
+      }
+
+      .company-name {
+        font-size: 14pt;
+        font-weight: bold;
+        color: #1e3a8a;
+      }
+
+      .report-title {
+        text-align: center;
+        font-size: 11pt;
+        font-weight: bold;
+        margin: 10px 0;
+        padding: 5px;
+        background-color: #d0d0ff;
+      }
+
+      .info-table {
+        margin-bottom: 5px;
+      }
+
+      .checkbox {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border: 1px solid #000;
+        margin-right: 5px;
+      }
+
+      .footer {
+        margin-top: 20px;
+        font-size: 7pt;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header -->
+    <div class="logo-container">
+      <div class="company-name">INDUS CONTROL</div>
+      <div style="font-size: 9pt">Industrial Instrumentation & Automation</div>
+    </div>
+
+    <div class="report-title">
+      VERIFICATION REPORT - ROSEMOUNT ELECTRO-MAGNETIC FLOW MEASUREMENT
+    </div>
+
+    <!-- Customer Information -->
+    <table class="info-table">
+      <tr class="header-row">
+        <td colspan="4">CUSTOMER INFORMATION</td>
+      </tr>
+      <tr>
+        <td style="width: 15%"><strong>Customer:</strong></td>
+        <td style="width: 35%">Sample Customer</td>
+        <td style="width: 15%"><strong>Plant Name:</strong></td>
+        <td style="width: 35%">{{location}}</td>
+      </tr>
+      <tr>
+        <td><strong>Site Address:</strong></td>
+        <td colspan="3">{{location}}</td>
+      </tr>
+    </table>
+
+    <!-- Device Information -->
+    <table class="info-table">
+      <tr class="header-row">
+        <td colspan="4">DEVICE INFORMATION</td>
+      </tr>
+      <tr>
+        <td style="width: 15%"><strong>Make:</strong></td>
+        <td style="width: 35%">{{manufacturer}}</td>
+        <td style="width: 15%"><strong>Model:</strong></td>
+        <td style="width: 35%">{{model}}</td>
+      </tr>
+      <tr>
+        <td><strong>Serial No:</strong></td>
+        <td>{{serialNumber}}</td>
+        <td><strong>Asset ID:</strong></td>
+        <td>{{equipmentNumber}}</td>
+      </tr>
+      <tr>
+        <td><strong>Unit:</strong></td>
+        <td>Flow Transmitter</td>
+        <td><strong>Flow Range:</strong></td>
+        <td>{{flowRange}}</td>
+      </tr>
+    </table>
+
+    <!-- Service Information -->
+    <table class="info-table">
+      <tr class="header-row">
+        <td colspan="4">SERVICE INFORMATION</td>
+      </tr>
+      <tr>
+        <td style="width: 15%"><strong>Date:</strong></td>
+        <td style="width: 35%">{{currentDate}}</td>
+        <td style="width: 15%"><strong>Report No:</strong></td>
+        <td style="width: 35%">{{equipmentNumber}}</td>
+      </tr>
+      <tr>
+        <td><strong>Status:</strong></td>
+        <td colspan="3">
+          <span style="font-weight: bold; color: {{statusClass}}"
+            >{{status}}</span
+          >
+        </td>
+      </tr>
+    </table>
+
+    <!-- Maintenance Checklist -->
+    <table>
+      <tr class="header-row">
+        <td colspan="3">MAINTENANCE CHECKLIST</td>
+      </tr>
+      <tr>
+        <td style="width: 5%">1.</td>
+        <td style="width: 85%">Physical inspection of transmitter</td>
+        <td style="width: 10%"><span class="checkbox"></span> OK</td>
+      </tr>
+      <tr>
+        <td>2.</td>
+        <td>Check connections & wiring</td>
+        <td><span class="checkbox"></span> OK</td>
+      </tr>
+      <tr>
+        <td>3.</td>
+        <td>Verify configuration parameters</td>
+        <td><span class="checkbox"></span> OK</td>
+      </tr>
+      <tr>
+        <td>4.</td>
+        <td>Calibration verification</td>
+        <td><span class="checkbox"></span> OK</td>
+      </tr>
+    </table>
+
+    <!-- Instrument Test Results -->
+    <table>
+      <tr class="header-row">
+        <td colspan="4">INSTRUMENT TEST RESULTS</td>
+      </tr>
+      <tr class="section-header">
+        <td>Parameter</td>
+        <td>Set Point</td>
+        <td>Measured Value</td>
+        <td>Status</td>
+      </tr>
+      <tr>
+        <td>4mA Output</td>
+        <td class="highlight-yellow">4.00 mA</td>
+        <td>4.01 mA</td>
+        <td>PASS</td>
+      </tr>
+      <tr>
+        <td>20mA Output</td>
+        <td class="highlight-yellow">20.00 mA</td>
+        <td>19.98 mA</td>
+        <td>PASS</td>
+      </tr>
+      <tr>
+        <td>Flow Indication</td>
+        <td>0 - {{flowRange}}</td>
+        <td>Verified</td>
+        <td>PASS</td>
+      </tr>
+    </table>
+
+    <!-- Tools & Equipment -->
+    <table>
+      <tr class="header-row">
+        <td colspan="3">TOOLS & EQUIPMENT USED</td>
+      </tr>
+      <tr class="section-header">
+        <td>Equipment</td>
+        <td>ID/Serial No</td>
+        <td>Calibration Due</td>
+      </tr>
+      <tr>
+        <td>Digital Multimeter</td>
+        <td>DMM-001</td>
+        <td>Valid</td>
+      </tr>
+      <tr>
+        <td>Flow Calibrator</td>
+        <td>FC-123</td>
+        <td>Valid</td>
+      </tr>
+    </table>
+
+    <!-- Verification Result -->
+    <table>
+      <tr class="header-row">
+        <td>VERIFICATION TEST RESULT</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; padding: 10px">
+          <span
+            style="
+              font-size: 12pt;
+              font-weight: bold;
+              color: green;
+              padding: 10px 20px;
+              border: 2px solid green;
+            "
+            >✓ PASSED</span
+          >
+        </td>
+      </tr>
+    </table>
+
+    <!-- Signature Section -->
+    <table style="margin-top: 15px">
+      <tr>
+        <td style="width: 50%; text-align: center">
+          <div
+            style="
+              margin-top: 30px;
+              border-top: 1px solid #000;
+              padding-top: 5px;
+            "
+          >
+            Service Technician
+          </div>
+        </td>
+        <td style="width: 50%; text-align: center">
+          <div
+            style="
+              margin-top: 30px;
+              border-top: 1px solid #000;
+              padding-top: 5px;
+            "
+          >
+            Customer Representative
+          </div>
+        </td>
+      </tr>
+    </table>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>
+        This verification was performed as per manufacturer's guidelines and
+        industry standards.
+      </p>
+      <p>Report generated on {{currentDate}}</p>
+    </div>
+  </body>
+</html>

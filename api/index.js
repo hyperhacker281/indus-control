@@ -6,6 +6,11 @@ const {
   ClientSecretCredential,
 } = require("@azure/identity");
 const axios = require("axios");
+const chromium = require("chrome-aws-lambda");
+const puppeteer = require("puppeteer-core");
+const handlebars = require("handlebars");
+const fs = require("fs");
+const path = require("path");
 
 const app = express();
 
@@ -148,6 +153,92 @@ app.delete("/api/equipment/:id", async (req, res) => {
     res.json({ success: true });
   } catch (error) {
     console.error("Error deleting equipment:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// PDF Generation endpoint
+app.get("/api/equipment/:id/pdf", async (req, res) => {
+  try {
+    // Fetch equipment data
+    const result = await queryDataverse(
+      `cr164_equipments(${req.params.id})?$select=cr164_equipmentid,cr164_equipmentnumber,cr164_equipmentdescription,cr164_location,cr164_manufacturer,cr164_model,cr164_serialnumber,cr164_flowrange,statecode,createdon`
+    );
+    const equipment = result;
+
+    // Read the HTML template
+    const templatePath = path.join(
+      __dirname,
+      "templates/equipment-report.html"
+    );
+    const templateContent = fs.readFileSync(templatePath, "utf8");
+
+    // Compile the template
+    const template = handlebars.compile(templateContent);
+
+    // Prepare data for template
+    const data = {
+      currentDate: new Date().toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      }),
+      equipmentNumber: equipment.cr164_equipmentnumber || "N/A",
+      description: equipment.cr164_equipmentdescription || "N/A",
+      location: equipment.cr164_location || "N/A",
+      manufacturer: equipment.cr164_manufacturer || "N/A",
+      model: equipment.cr164_model || "N/A",
+      serialNumber: equipment.cr164_serialnumber || "N/A",
+      flowRange: equipment.cr164_flowrange || "N/A",
+      status:
+        equipment["statecode@OData.Community.Display.V1.FormattedValue"] ||
+        "N/A",
+      statusClass: equipment.statecode === 0 ? "#10b981" : "#ef4444",
+    };
+
+    // Generate HTML with data
+    const html = template(data);
+
+    // Launch Puppeteer with chrome-aws-lambda
+    const browser = await puppeteer.launch({
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath,
+      headless: chromium.headless,
+    });
+
+    const page = await browser.newPage();
+
+    // Set content
+    await page.setContent(html, {
+      waitUntil: "networkidle0",
+    });
+
+    // Generate PDF
+    const pdfBuffer = await page.pdf({
+      format: "Letter",
+      printBackground: true,
+      margin: {
+        top: "0.5in",
+        right: "0.5in",
+        bottom: "0.5in",
+        left: "0.5in",
+      },
+    });
+
+    await browser.close();
+
+    // Send PDF
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="Equipment_Report_${
+        equipment.cr164_equipmentnumber || req.params.id
+      }.pdf"`
+    );
+    res.send(pdfBuffer);
+  } catch (error) {
+    console.error("Error generating PDF:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
