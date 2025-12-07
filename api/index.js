@@ -221,7 +221,7 @@ app.get("/api/equipment/:id/pdf", async (req, res) => {
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer f206f6f085f729c0de384ffc`,
+          Authorization: `Bearer ${process.env.DOPPIO_API_KEY}`,
         },
         responseType: "arraybuffer",
         timeout: 30000,
@@ -241,7 +241,11 @@ app.get("/api/equipment/:id/pdf", async (req, res) => {
   } catch (error) {
     console.error("Error generating PDF:", error.message);
     if (error.response) {
-      console.error("Doppio API error:", error.response.status, error.response.data);
+      console.error(
+        "Doppio API error:",
+        error.response.status,
+        error.response.data
+      );
     }
     res.status(500).json({
       success: false,
