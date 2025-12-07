@@ -90,21 +90,22 @@ function EquipmentTable({
                       >
                         ✏️ Edit
                       </button>
-                      {/* PDF features only work in local development */}
+                      {/* HTML PDF works on production with Doppio API */}
+                      <button
+                        className="btn btn-success"
+                        onClick={() =>
+                          onDownloadPDF(
+                            item.cr164_equipmentid,
+                            item.cr164_equipmentnumber
+                          )
+                        }
+                        title="Download PDF Report (HTML Template)"
+                      >
+                        📄 PDF
+                      </button>
+                      {/* Word features only in local development */}
                       {process.env.NODE_ENV !== "production" && (
                         <>
-                          <button
-                            className="btn btn-success"
-                            onClick={() =>
-                              onDownloadPDF(
-                                item.cr164_equipmentid,
-                                item.cr164_equipmentnumber
-                              )
-                            }
-                            title="Download PDF Report (HTML Template)"
-                          >
-                            📄 PDF
-                          </button>
                           <button
                             className="btn btn-primary"
                             onClick={() =>
