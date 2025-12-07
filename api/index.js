@@ -251,6 +251,74 @@ app.get("/api/equipment/:id/pdf", async (req, res) => {
   }
 });
 
+// Power Automate endpoint - Returns equipment data for PDF generation
+app.post("/api/power-automate/equipment-data", async (req, res) => {
+  try {
+    const { equipmentId } = req.body;
+
+    if (!equipmentId) {
+      return res.status(400).json({
+        success: false,
+        error: "equipmentId is required",
+      });
+    }
+
+    // Fetch equipment data from Dataverse
+    const result = await queryDataverse(
+      `cr164_equipments(${equipmentId})?$select=cr164_equipmentid,cr164_equipmentnumber,cr164_equipmentdescription,cr164_location,cr164_manufacturer,cr164_model,cr164_serialnumber,cr164_flowrange,statecode,createdon`
+    );
+    const equipment = result;
+
+    // Prepare data in the exact format needed for Power Automate
+    const currentDate = new Date().toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+
+    const equipmentData = {
+      currentDate: currentDate,
+      equipmentNumber: equipment.cr164_equipmentnumber || "N/A",
+      description: equipment.cr164_equipmentdescription || "N/A",
+      location: equipment.cr164_location || "N/A",
+      manufacturer: equipment.cr164_manufacturer || "N/A",
+      model: equipment.cr164_model || "N/A",
+      serialNumber: equipment.cr164_serialnumber || "N/A",
+      flowRange: equipment.cr164_flowrange || "N/A",
+      status:
+        equipment["statecode@OData.Community.Display.V1.FormattedValue"] ||
+        "N/A",
+    };
+
+    // Also read and send the HTML template
+    const templatePath = path.join(
+      __dirname,
+      "templates/equipment-report.html"
+    );
+    const templateContent = fs.readFileSync(templatePath, "utf8");
+
+    // Return both data and template
+    res.json({
+      success: true,
+      data: equipmentData,
+      template: templateContent,
+      // PDFShift configuration to use in Power Automate
+      pdfConfig: {
+        api_key: process.env.PDFSHIFT_API_KEY,
+        format: "Letter",
+        margin: "0.3in",
+        use_print: true,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching equipment data:", error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
 // Health check
 app.get("/api/health", (req, res) => {
   res.json({
