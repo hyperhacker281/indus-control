@@ -198,28 +198,24 @@ app.get("/api/equipment/:id/pdf", async (req, res) => {
     // Generate HTML with data
     const html = template(data);
 
-    console.log("Calling Doppio API for PDF generation...");
+    console.log("Calling PDFShift API for PDF generation...");
 
-    // Use Doppio API for PDF conversion
+    // Use PDFShift API for PDF conversion
     const pdfResponse = await axios.post(
-      "https://api.doppio.sh/v1/render/pdf/sync",
+      "https://api.pdfshift.io/v3/convert/pdf",
       {
-        html: html,
-        options: {
-          format: "Letter",
-          printBackground: true,
-          margin: {
-            top: "0.3in",
-            right: "0.3in",
-            bottom: "0.3in",
-            left: "0.3in",
-          },
-        },
+        source: html,
+        format: "Letter",
+        margin: "0.3in",
+        use_print: true,
       },
       {
+        auth: {
+          username: "api",
+          password: process.env.PDFSHIFT_API_KEY,
+        },
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.DOPPIO_API_KEY}`,
         },
         responseType: "arraybuffer",
         timeout: 30000,
