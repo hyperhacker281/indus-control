@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      Verification Report - Rosemount Electro-Magnetic Flow Measurement
+    </title>
+    <style>
+      @page {
+        size: Letter;
+        margin: 0.3in;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        font-size: 8pt;
+        color: #000;
+        line-height: 1.2;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 2px;
+      }
+
+      td,
+      th {
+        border: 1px solid #000;
+        padding: 3px 5px;
+        vertical-align: top;
+      }
+
+      .header-row {
+        background-color: #d0d0ff;
+        font-weight: bold;
+        text-align: center;
+        padding: 4px;
+      }
+
+      .section-header {
+        background-color: #d0d0ff;
+        font-weight: bold;
+        text-align: center;
+        padding: 4px;
+      }
+
+      .label-cell {
+        background-color: #d0d0ff;
+        font-weight: normal;
+        width: 120px;
+      }
+
+      .value-cell {
+        background-color: white;
+      }
+
+      .checkbox-cell {
+        text-align: center;
+        width: 40px;
+      }
+
+      .yellow-highlight {
+        background-color: #ffff99;
+      }
+
+      .logo-container {
+        width: 100px;
+        vertical-align: middle;
+      }
+
+      .company-info {
+        font-size: 9pt;
+        padding: 5px;
+      }
+
+      .report-title {
+        font-size: 11pt;
+        font-weight: bold;
+        text-align: center;
+      }
+
+      .test-table td {
+        text-align: center;
+        font-size: 7pt;
+      }
+
+      .pass-fail-section {
+        text-align: center;
+        padding: 5px;
+      }
+
+      .green-bg {
+        background-color: #90ee90;
+      }
+
+      .red-bg {
+        background-color: #ffb6c6;
+      }
+
+      .white-bg {
+        background-color: white;
+      }
+
+      .remarks-cell {
+        min-height: 30px;
+      }
+
+      .footer-text {
+        text-align: center;
+        font-size: 7pt;
+        padding: 2px;
+      }
+
+      @media print {
+        body {
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header with Logo and Title -->
+    <table>
+      <tr>
+        <td class="logo-container" rowspan="2">
+          <img
+            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Crect fill='%234682B4' width='80' height='80'/%3E%3Ctext x='50%25' y='50%25' font-size='10' fill='white' text-anchor='middle' dy='.3em'%3EINDUS%0ACONTROL%3C/text%3E%3C/svg%3E"
+            alt="Logo"
+            style="width: 80px"
+          />
+        </td>
+        <td class="company-info">
+          <strong>IndusControl Inc.</strong><br />
+          3170 Ridgeway Drive,<br />
+          Unit #11,Mississauga,<br />
+          ON L5L 5R4
+        </td>
+        <td class="report-title" colspan="2">
+          VERIFICATION REPORT - ROSEMOUNT<br />
+          ELECTRO-MAGNETIC FLOW MEASUREMENT
+        </td>
+      </tr>
+    </table>
+
+    <!-- Customer and Plant Information -->
+    <table>
+      <tr>
+        <td class="label-cell">Customer Name:</td>
+        <td class="value-cell" colspan="2">Region of Niagara</td>
+        <td class="label-cell">Site/Plant Address:</td>
+        <td class="value-cell">{{location}}</td>
+      </tr>
+      <tr>
+        <td class="label-cell">Plant Name:</td>
+        <td class="value-cell" colspan="2">{{description}}</td>
+        <td class="label-cell"></td>
+        <td class="value-cell"></td>
+      </tr>
+    </table>
+
+    <!-- Device and Service Information -->
+    <table>
+      <tr>
+        <td class="section-header" colspan="3">Device Information</td>
+        <td class="section-header" colspan="2">Service Information</td>
+      </tr>
+      <tr>
+        <td class="label-cell">Make:</td>
+        <td class="value-cell" colspan="2">{{manufacturer}}</td>
+        <td class="label-cell">Date:</td>
+        <td class="value-cell">{{currentDate}}</td>
+      </tr>
+      <tr>
+        <td class="label-cell">Model:</td>
+        <td class="value-cell" colspan="2">{{model}}</td>
+        <td class="label-cell">Report No:</td>
+        <td class="value-cell">{{equipmentNumber}}</td>
+      </tr>
+      <tr>
+        <td class="label-cell">Order Code:</td>
+        <td class="value-cell" colspan="2">N/A</td>
+        <td class="label-cell">Job No:</td>
+        <td class="value-cell">{{equipmentNumber}}</td>
+      </tr>
+      <tr>
+        <td class="label-cell">Serial No.:</td>
+        <td class="value-cell" colspan="2">{{serialNumber}}</td>
+        <td class="section-header" colspan="2">Flow Details</td>
+      </tr>
+      <tr>
+        <td class="label-cell">Software Version</td>
+        <td class="value-cell" colspan="2">5.3.1</td>
+        <td class="label-cell">Unit:</td>
+        <td class="value-cell">MLD</td>
+      </tr>
+      <tr>
+        <td class="label-cell">Job Location:</td>
+        <td class="value-cell" colspan="2">{{location}}</td>
+        <td class="label-cell">Flow Range:</td>
+        <td class="value-cell">{{flowRange}}</td>
+      </tr>
+      <tr>
+        <td class="label-cell">Asset ID:</td>
+        <td class="value-cell" colspan="2">{{equipmentNumber}}</td>
+        <td class="label-cell">Current Output:</td>
+        <td class="value-cell">4-20 mA</td>
+      </tr>
+      <tr>
+        <td class="section-header" colspan="3">Sensor Details</td>
+        <td class="label-cell">4 mA Set Point</td>
+        <td class="value-cell">0</td>
+      </tr>
+      <tr>
+        <td class="label-cell">Line size:</td>
+        <td class="value-cell" colspan="2">6"</td>
+        <td class="label-cell">20 mA Set Point</td>
+        <td class="value-cell">14.725</td>
+      </tr>
+      <tr>
+        <td class="label-cell">Flow Cal Tube No.:</td>
+        <td class="value-cell" colspan="2">090490550</td>
+        <td class="label-cell" rowspan="3">Inst. Reading</td>
+        <td class="label-cell">AS FOUND</td>
+      </tr>
+      <tr>
+        <td class="label-cell">Mounting:</td>
+        <td class="value-cell" colspan="2">Remote</td>
+        <td class="value-cell">385.74</td>
+      </tr>
+      <tr>
+        <td colspan="3"></td>
+        <td class="value-cell">0.56</td>
+      </tr>
+    </table>
+
+    <!-- Maintenance Checklist -->
+    <table>
+      <tr>
+        <td class="header-row" colspan="3">Maintenance Checklist</td>
+        <td class="header-row">Remarks</td>
+      </tr>
+      <tr>
+        <td class="label-cell">Visual Inspection:</td>
+        <td class="checkbox-cell">☐ OK</td>
+        <td class="checkbox-cell">☐ NOT OK</td>
+        <td class="remarks-cell" rowspan="4"></td>
+      </tr>
+      <tr>
+        <td class="label-cell">Electrical Inspection:</td>
+        <td class="checkbox-cell">☐ OK</td>
+        <td class="checkbox-cell">☐ NOT OK</td>
+      </tr>
+      <tr>
+        <td class="label-cell">Sensor Installation:</td>
+        <td class="checkbox-cell">☐ OK</td>
+        <td class="checkbox-cell">☐ NOT OK</td>
+      </tr>
+      <tr>
+        <td class="label-cell">Transmitter Installation:</td>
+        <td class="checkbox-cell">☐ OK</td>
+        <td class="checkbox-cell">☐ NOT OK</td>
+      </tr>
+    </table>
+
+    <!-- Instrument Test Information -->
+    <table class="test-table">
+      <tr>
+        <td class="header-row" colspan="8">
+          Instrument Test Information and Results
+        </td>
+        <td class="header-row" colspan="2">SCADA Test Details</td>
+      </tr>
+      <tr>
+        <td class="label-cell">Test-Point as Per<br />Calibration KIT</td>
+        <td class="label-cell">Calculated Flow<br />(FPS)</td>
+        <td class="label-cell">Calculated O/P<br />(mA)</td>
+        <td class="label-cell">UUT Display<br />(FPS)</td>
+        <td class="label-cell">UUT<br />Measured<br />Output (mA)</td>
+        <td class="label-cell">Deviation<br />(FPS)</td>
+        <td class="label-cell">Calculated mA</td>
+        <td class="label-cell" colspan="2">Value on SCADA(MLD)</td>
+      </tr>
+      <tr>
+        <td class="yellow-highlight">0.00</td>
+        <td class="yellow-highlight">0.00</td>
+        <td class="yellow-highlight">4.00</td>
+        <td class="yellow-highlight">0.00</td>
+        <td class="yellow-highlight">4.00</td>
+        <td class="yellow-highlight">0.00</td>
+        <td class="yellow-highlight">4.00</td>
+        <td class="yellow-highlight" colspan="2">0.00</td>
+      </tr>
+      <tr>
+        <td class="yellow-highlight">3.00</td>
+        <td class="yellow-highlight">3.00</td>
+        <td class="yellow-highlight">5.60</td>
+        <td class="yellow-highlight">2.98</td>
+        <td class="yellow-highlight">5.56</td>
+        <td class="yellow-highlight">0.02</td>
+        <td class="yellow-highlight">5.60</td>
+        <td class="yellow-highlight" colspan="2">1.44</td>
+      </tr>
+      <tr>
+        <td class="yellow-highlight">10.00</td>
+        <td class="yellow-highlight">10.00</td>
+        <td class="yellow-highlight">9.33</td>
+        <td class="yellow-highlight">10.03</td>
+        <td class="yellow-highlight">9.28</td>
+        <td class="yellow-highlight">-0.03</td>
+        <td class="yellow-highlight">9.33</td>
+        <td class="yellow-highlight" colspan="2">4.91</td>
+      </tr>
+      <tr>
+        <td class="yellow-highlight">30.00</td>
+        <td class="yellow-highlight">30.00</td>
+        <td class="yellow-highlight">20.00</td>
+        <td class="yellow-highlight">29.97</td>
+        <td class="yellow-highlight">19.98</td>
+        <td class="yellow-highlight">0.03</td>
+        <td class="yellow-highlight">20.00</td>
+        <td class="yellow-highlight" colspan="2">14.69</td>
+      </tr>
+    </table>
+
+    <!-- Tools Information -->
+    <table>
+      <tr>
+        <td class="header-row" colspan="4">
+          Information of Tools used for Verification of the Instruments
+        </td>
+      </tr>
+      <tr>
+        <td class="label-cell">Details</td>
+        <td class="label-cell">Tool/Kit 1</td>
+        <td class="label-cell">Tool/Kit 2</td>
+        <td class="label-cell">Tool/Kit 3</td>
+      </tr>
+      <tr>
+        <td class="label-cell">Device Description:</td>
+        <td class="value-cell">Calibrator</td>
+        <td class="value-cell">Electrical Multimeter</td>
+        <td class="value-cell">N/A</td>
+      </tr>
+      <tr>
+        <td class="label-cell">Manufacturer:</td>
+        <td class="value-cell">Rosemount</td>
+        <td class="value-cell">Fluke</td>
+        <td class="value-cell">N/A</td>
+      </tr>
+      <tr>
+        <td class="label-cell">Model No:</td>
+        <td class="value-cell">8714D</td>
+        <td class="value-cell">T79</td>
+        <td class="value-cell">N/A</td>
+      </tr>
+      <tr>
+        <td colspan="4" style="text-align: center; font-size: 7pt">
+          * Refer Calibration Tools Certificates submittal for more Information
+        </td>
+      </tr>
+    </table>
+
+    <!-- Verification Test Result -->
+    <table>
+      <tr>
+        <td class="label-cell">Verification Test Result:</td>
+        <td class="pass-fail-section green-bg">☐ &nbsp;&nbsp;&nbsp; Passed</td>
+        <td class="pass-fail-section red-bg">☐ &nbsp;&nbsp;&nbsp; Fail</td>
+        <td class="pass-fail-section white-bg">
+          ☐ &nbsp;&nbsp;&nbsp; Not Verified
+        </td>
+      </tr>
+      <tr>
+        <td class="label-cell">Overall Remarks:</td>
+        <td colspan="3">
+          Measurement Works within Specification.<br />Verification test Passed
+        </td>
+      </tr>
+    </table>
+
+    <!-- Signature Section -->
+    <table>
+      <tr>
+        <td class="label-cell" style="width: 25%">Service Technician :</td>
+        <td class="value-cell" style="width: 25%">Chetan Parekh</td>
+        <td class="label-cell" style="width: 25%; text-align: center">
+          Stamp/Signature
+        </td>
+        <td class="value-cell" style="width: 25%"></td>
+      </tr>
+      <tr>
+        <td class="label-cell">Printed Date:</td>
+        <td class="value-cell">{{currentDate}}</td>
+        <td colspan="2"></td>
+      </tr>
+    </table>
+
+    <!-- Footer -->
+    <table>
+      <tr>
+        <td class="footer-text" style="text-align: left">End of Report</td>
+        <td class="footer-text" style="text-align: right">Version 10-12</td>
+      </tr>
+    </table>
+  </body>
+</html>
