@@ -8,6 +8,7 @@ function EquipmentTable({
   onDownloadPDF,
   onDownloadDOCX,
   onDownloadWordPDF,
+  onDownloadPowerAutomatePDF,
 }) {
   if (loading) {
     return (
@@ -90,7 +91,7 @@ function EquipmentTable({
                       >
                         ✏️ Edit
                       </button>
-                      {/* HTML PDF works on production with Doppio API */}
+                      {/* HTML PDF works on production with PDFShift API */}
                       <button
                         className="btn btn-success"
                         onClick={() =>
@@ -99,9 +100,26 @@ function EquipmentTable({
                             item.cr164_equipmentnumber
                           )
                         }
-                        title="Download PDF Report (HTML Template)"
+                        title="Download PDF Report (PDFShift API)"
                       >
                         📄 PDF
+                      </button>
+                      {/* Power Automate PDF */}
+                      <button
+                        className="btn btn-success"
+                        onClick={() =>
+                          onDownloadPowerAutomatePDF(
+                            item.cr164_equipmentid,
+                            item.cr164_equipmentnumber
+                          )
+                        }
+                        title="Download PDF via Power Automate Flow"
+                        style={{
+                          backgroundColor: "#8b5cf6",
+                          fontSize: "0.875rem",
+                        }}
+                      >
+                        ⚡ PA-PDF
                       </button>
                       {/* Word features only in local development */}
                       {process.env.NODE_ENV !== "production" && (

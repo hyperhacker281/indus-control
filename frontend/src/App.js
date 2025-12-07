@@ -120,6 +120,17 @@ function App() {
     }
   };
 
+  const handleDownloadPowerAutomatePDF = async (id, equipmentNumber) => {
+    try {
+      setLoading(true);
+      await equipmentService.downloadPowerAutomatePDF(id, equipmentNumber);
+    } catch (err) {
+      alert("Failed to download PDF via Power Automate: " + (err.error || err));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSave = async (equipmentData) => {
     try {
       if (editingEquipment) {
@@ -172,6 +183,7 @@ function App() {
           onDownloadPDF={handleDownloadPDF}
           onDownloadDOCX={handleDownloadDOCX}
           onDownloadWordPDF={handleDownloadWordPDF}
+          onDownloadPowerAutomatePDF={handleDownloadPowerAutomatePDF}
         />
 
         {showModal && (
