@@ -120,14 +120,14 @@ function App() {
     }
   };
 
-  const handleDownloadPowerAutomatePDF = async (id, equipmentNumber) => {
+  const handleDownloadPowerAutomatePDF = async (equipmentData) => {
     try {
-      setLoading(true);
-      await equipmentService.downloadPowerAutomatePDF(id, equipmentNumber);
+      await equipmentService.triggerPowerAutomateFlow(equipmentData);
+      alert(
+        "Power Automate flow triggered successfully! PDF will be generated in the background."
+      );
     } catch (err) {
-      alert("Failed to download PDF via Power Automate: " + (err.error || err));
-    } finally {
-      setLoading(false);
+      alert("Failed to trigger Power Automate flow: " + (err.error || err));
     }
   };
 

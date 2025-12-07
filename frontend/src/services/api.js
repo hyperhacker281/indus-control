@@ -145,37 +145,46 @@ export const equipmentService = {
     }
   },
 
-  // Download PDF via Power Automate Flow
-  downloadPowerAutomatePDF: async (id, equipmentNumber) => {
+  // Trigger Power Automate Flow (fire-and-forget)
+  triggerPowerAutomateFlow: async (equipmentData) => {
     try {
       const POWER_AUTOMATE_URL =
         "https://65f93fb1f52fef59be0d67f1460c0d.f2.environment.api.powerplatform.com/powerautomate/automations/direct/workflows/65cd10f9c4a6437fb3b1ea8428ab3bb1/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=_NHIYysHqLGGBYjEO-e-3NX8hVTtKzs_h0lnRkRU_aE";
 
-      const response = await axios.post(
-        POWER_AUTOMATE_URL,
-        { equipmentId: id },
-        {
+      // Prepare complete equipment data
+      const currentDate = new Date().toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+
+      const payload = {
+        equipmentId: equipmentData.cr164_equipmentid,
+        currentDate: currentDate,
+        equipmentNumber: equipmentData.cr164_equipmentnumber || "N/A",
+        description: equipmentData.cr164_equipmentdescription || "N/A",
+        location: equipmentData.cr164_location || "N/A",
+        manufacturer: equipmentData.cr164_manufacturer || "N/A",
+        model: equipmentData.cr164_model || "N/A",
+        serialNumber: equipmentData.cr164_serialnumber || "N/A",
+        flowRange: equipmentData.cr164_flowrange || "N/A",
+        status:
+          equipmentData[
+            "statecode@OData.Community.Display.V1.FormattedValue"
+          ] || (equipmentData.statecode === 0 ? "Active" : "Inactive"),
+      };
+
+      // Fire and forget - don't wait for response
+      axios
+        .post(POWER_AUTOMATE_URL, payload, {
           headers: {
             "Content-Type": "application/json",
           },
-          responseType: "blob",
-          timeout: 60000, // 60 seconds for Power Automate flow
-        }
-      );
-
-      // Create download link from blob
-      const blob = new Blob([response.data], { type: "application/pdf" });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute(
-        "download",
-        `Equipment_${equipmentNumber || id}_Report_PA.pdf`
-      );
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
+          timeout: 5000, // Short timeout since we're not waiting
+        })
+        .catch(() => {
+          // Ignore errors - fire and forget
+        });
 
       return { success: true };
     } catch (error) {

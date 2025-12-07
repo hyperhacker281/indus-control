@@ -107,13 +107,8 @@ function EquipmentTable({
                       {/* Power Automate PDF */}
                       <button
                         className="btn btn-success"
-                        onClick={() =>
-                          onDownloadPowerAutomatePDF(
-                            item.cr164_equipmentid,
-                            item.cr164_equipmentnumber
-                          )
-                        }
-                        title="Download PDF via Power Automate Flow"
+                        onClick={() => onDownloadPowerAutomatePDF(item)}
+                        title="Trigger Power Automate Flow (Background Processing)"
                         style={{
                           backgroundColor: "#8b5cf6",
                           fontSize: "0.875rem",
