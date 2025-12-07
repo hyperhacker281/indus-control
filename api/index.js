@@ -159,6 +159,7 @@ app.delete("/api/equipment/:id", async (req, res) => {
 
 // PDF Generation endpoint
 app.get("/api/equipment/:id/pdf", async (req, res) => {
+  let browser = null;
   try {
     // Fetch equipment data
     const result = await queryDataverse(
@@ -200,18 +201,20 @@ app.get("/api/equipment/:id/pdf", async (req, res) => {
     const html = template(data);
 
     // Launch Puppeteer with chrome-aws-lambda
-    const browser = await puppeteer.launch({
-      args: chromium.args,
+    browser = await puppeteer.launch({
+      args: [...chromium.args, '--no-sandbox', '--disable-setuid-sandbox'],
       defaultViewport: chromium.defaultViewport,
       executablePath: await chromium.executablePath,
       headless: chromium.headless,
+      ignoreHTTPSErrors: true,
     });
 
     const page = await browser.newPage();
 
-    // Set content
+    // Set content with shorter timeout
     await page.setContent(html, {
-      waitUntil: "networkidle0",
+      waitUntil: "domcontentloaded",
+      timeout: 10000,
     });
 
     // Generate PDF
@@ -227,18 +230,24 @@ app.get("/api/equipment/:id/pdf", async (req, res) => {
     });
 
     await browser.close();
+    browser = null;
 
-    // Send PDF
+    // Send PDF with proper headers
+    const filename = `Equipment_Report_${equipment.cr164_equipmentnumber || req.params.id}.pdf`;
     res.setHeader("Content-Type", "application/pdf");
-    res.setHeader(
-      "Content-Disposition",
-      `attachment; filename="Equipment_Report_${
-        equipment.cr164_equipmentnumber || req.params.id
-      }.pdf"`
-    );
-    res.send(pdfBuffer);
+    res.setHeader("Content-Length", pdfBuffer.length);
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+    res.setHeader("Cache-Control", "no-cache");
+    res.end(pdfBuffer, "binary");
   } catch (error) {
     console.error("Error generating PDF:", error);
+    if (browser) {
+      try {
+        await browser.close();
+      } catch (e) {
+        console.error("Error closing browser:", e);
+      }
+    }
     res.status(500).json({ success: false, error: error.message });
   }
 });
