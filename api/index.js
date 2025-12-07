@@ -6,8 +6,7 @@ const {
   ClientSecretCredential,
 } = require("@azure/identity");
 const axios = require("axios");
-const chromium = require("chrome-aws-lambda");
-const puppeteer = require("puppeteer-core");
+const PDFDocument = require("pdfkit");
 const handlebars = require("handlebars");
 const fs = require("fs");
 const path = require("path");
@@ -159,7 +158,6 @@ app.delete("/api/equipment/:id", async (req, res) => {
 
 // PDF Generation endpoint
 app.get("/api/equipment/:id/pdf", async (req, res) => {
-  let browser = null;
   try {
     // Fetch equipment data
     const result = await queryDataverse(
@@ -167,87 +165,134 @@ app.get("/api/equipment/:id/pdf", async (req, res) => {
     );
     const equipment = result;
 
-    // Read the HTML template
-    const templatePath = path.join(
-      __dirname,
-      "templates/equipment-report.html"
-    );
-    const templateContent = fs.readFileSync(templatePath, "utf8");
+    // Create PDF document
+    const doc = new PDFDocument({ size: "LETTER", margin: 50 });
+    const chunks = [];
 
-    // Compile the template
-    const template = handlebars.compile(templateContent);
-
-    // Prepare data for template
-    const data = {
-      currentDate: new Date().toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      }),
-      equipmentNumber: equipment.cr164_equipmentnumber || "N/A",
-      description: equipment.cr164_equipmentdescription || "N/A",
-      location: equipment.cr164_location || "N/A",
-      manufacturer: equipment.cr164_manufacturer || "N/A",
-      model: equipment.cr164_model || "N/A",
-      serialNumber: equipment.cr164_serialnumber || "N/A",
-      flowRange: equipment.cr164_flowrange || "N/A",
-      status:
-        equipment["statecode@OData.Community.Display.V1.FormattedValue"] ||
-        "N/A",
-      statusClass: equipment.statecode === 0 ? "#10b981" : "#ef4444",
-    };
-
-    // Generate HTML with data
-    const html = template(data);
-
-    // Launch Puppeteer with chrome-aws-lambda
-    browser = await puppeteer.launch({
-      args: [...chromium.args, '--no-sandbox', '--disable-setuid-sandbox'],
-      defaultViewport: chromium.defaultViewport,
-      executablePath: await chromium.executablePath,
-      headless: chromium.headless,
-      ignoreHTTPSErrors: true,
+    // Collect PDF data
+    doc.on("data", (chunk) => chunks.push(chunk));
+    doc.on("end", () => {
+      const pdfBuffer = Buffer.concat(chunks);
+      const filename = `Equipment_Report_${equipment.cr164_equipmentnumber || req.params.id}.pdf`;
+      
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Length", pdfBuffer.length);
+      res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+      res.end(pdfBuffer);
     });
 
-    const page = await browser.newPage();
+    // Title
+    doc.fontSize(20)
+      .fillColor("#1e3a8a")
+      .text("INDUS CONTROL", { align: "center" });
+    
+    doc.fontSize(10)
+      .fillColor("#000")
+      .text("Industrial Instrumentation & Automation", { align: "center" });
+    
+    doc.moveDown();
+    
+    doc.fontSize(14)
+      .fillColor("#000")
+      .text("VERIFICATION REPORT", { align: "center" });
+    
+    doc.fontSize(12)
+      .text("Rosemount Electro-Magnetic Flow Measurement", { align: "center" });
+    
+    doc.moveDown(2);
 
-    // Set content with shorter timeout
-    await page.setContent(html, {
-      waitUntil: "domcontentloaded",
-      timeout: 10000,
+    // Customer Information Section
+    doc.fontSize(12).fillColor("#1e3a8a").text("CUSTOMER INFORMATION", { underline: true });
+    doc.moveDown(0.5);
+    doc.fontSize(10).fillColor("#000");
+    doc.text(`Customer: Sample Customer`);
+    doc.text(`Plant Name: ${equipment.cr164_location || "N/A"}`);
+    doc.text(`Site Address: ${equipment.cr164_location || "N/A"}`);
+    doc.moveDown();
+
+    // Device Information Section
+    doc.fontSize(12).fillColor("#1e3a8a").text("DEVICE INFORMATION", { underline: true });
+    doc.moveDown(0.5);
+    doc.fontSize(10).fillColor("#000");
+    doc.text(`Make: ${equipment.cr164_manufacturer || "N/A"}`);
+    doc.text(`Model: ${equipment.cr164_model || "N/A"}`);
+    doc.text(`Serial No: ${equipment.cr164_serialnumber || "N/A"}`);
+    doc.text(`Asset ID: ${equipment.cr164_equipmentnumber || "N/A"}`);
+    doc.text(`Unit: Flow Transmitter`);
+    doc.text(`Flow Range: ${equipment.cr164_flowrange || "N/A"}`);
+    doc.moveDown();
+
+    // Service Information Section
+    const currentDate = new Date().toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
+    
+    doc.fontSize(12).fillColor("#1e3a8a").text("SERVICE INFORMATION", { underline: true });
+    doc.moveDown(0.5);
+    doc.fontSize(10).fillColor("#000");
+    doc.text(`Date: ${currentDate}`);
+    doc.text(`Report No: ${equipment.cr164_equipmentnumber || "N/A"}`);
+    doc.text(`Status: ${equipment["statecode@OData.Community.Display.V1.FormattedValue"] || "N/A"}`);
+    doc.moveDown();
 
-    // Generate PDF
-    const pdfBuffer = await page.pdf({
-      format: "Letter",
-      printBackground: true,
-      margin: {
-        top: "0.5in",
-        right: "0.5in",
-        bottom: "0.5in",
-        left: "0.5in",
-      },
-    });
+    // Maintenance Checklist Section
+    doc.fontSize(12).fillColor("#1e3a8a").text("MAINTENANCE CHECKLIST", { underline: true });
+    doc.moveDown(0.5);
+    doc.fontSize(10).fillColor("#000");
+    doc.text("☑ Physical inspection of transmitter - OK");
+    doc.text("☑ Check connections & wiring - OK");
+    doc.text("☑ Verify configuration parameters - OK");
+    doc.text("☑ Calibration verification - OK");
+    doc.moveDown();
 
-    await browser.close();
-    browser = null;
+    // Instrument Test Results Section
+    doc.fontSize(12).fillColor("#1e3a8a").text("INSTRUMENT TEST RESULTS", { underline: true });
+    doc.moveDown(0.5);
+    doc.fontSize(10).fillColor("#000");
+    doc.text("4mA Output: Set Point 4.00 mA | Measured 4.01 mA | Status: PASS");
+    doc.text("20mA Output: Set Point 20.00 mA | Measured 19.98 mA | Status: PASS");
+    doc.text(`Flow Indication: 0 - ${equipment.cr164_flowrange || "N/A"} | Status: PASS`);
+    doc.moveDown();
 
-    // Send PDF with proper headers
-    const filename = `Equipment_Report_${equipment.cr164_equipmentnumber || req.params.id}.pdf`;
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Length", pdfBuffer.length);
-    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
-    res.setHeader("Cache-Control", "no-cache");
-    res.end(pdfBuffer, "binary");
+    // Tools & Equipment Section
+    doc.fontSize(12).fillColor("#1e3a8a").text("TOOLS & EQUIPMENT USED", { underline: true });
+    doc.moveDown(0.5);
+    doc.fontSize(10).fillColor("#000");
+    doc.text("Digital Multimeter (DMM-001) - Calibration Valid");
+    doc.text("Flow Calibrator (FC-123) - Calibration Valid");
+    doc.moveDown();
+
+    // Verification Result
+    doc.fontSize(14)
+      .fillColor("#10b981")
+      .text("✓ VERIFICATION TEST RESULT: PASSED", { align: "center" });
+    doc.moveDown(2);
+
+    // Signature Section
+    doc.fontSize(10).fillColor("#000");
+    const signatureY = doc.y;
+    doc.text("_______________________", 100, signatureY);
+    doc.text("Service Technician", 100, signatureY + 20);
+    doc.text("_______________________", 350, signatureY);
+    doc.text("Customer Representative", 350, signatureY + 20);
+    
+    doc.moveDown(3);
+
+    // Footer
+    doc.fontSize(8)
+      .fillColor("#666")
+      .text(
+        "This verification was performed as per manufacturer's guidelines and industry standards.",
+        { align: "center" }
+      );
+    doc.text(`Report generated on ${currentDate}`, { align: "center" });
+
+    // Finalize PDF
+    doc.end();
   } catch (error) {
     console.error("Error generating PDF:", error);
-    if (browser) {
-      try {
-        await browser.close();
-      } catch (e) {
-        console.error("Error closing browser:", e);
-      }
-    }
     res.status(500).json({ success: false, error: error.message });
   }
 });
