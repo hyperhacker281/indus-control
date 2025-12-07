@@ -6,7 +6,7 @@ const {
   ClientSecretCredential,
 } = require("@azure/identity");
 const axios = require("axios");
-const htmlToPdf = require("html-pdf-node");
+const puppeteer = require("puppeteer");
 const handlebars = require("handlebars");
 const fs = require("fs");
 const path = require("path");
@@ -158,6 +158,7 @@ app.delete("/api/equipment/:id", async (req, res) => {
 
 // PDF Generation endpoint
 app.get("/api/equipment/:id/pdf", async (req, res) => {
+  let browser = null;
   try {
     // Fetch equipment data
     const result = await queryDataverse(
@@ -199,8 +200,31 @@ app.get("/api/equipment/:id/pdf", async (req, res) => {
     // Generate HTML with data
     const html = template(data);
 
-    // PDF options
-    const options = {
+    // Launch Puppeteer
+    browser = await puppeteer.launch({
+      headless: "new",
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-accelerated-2d-canvas",
+        "--no-first-run",
+        "--no-zygote",
+        "--single-process",
+        "--disable-gpu",
+      ],
+    });
+
+    const page = await browser.newPage();
+
+    // Set content
+    await page.setContent(html, {
+      waitUntil: "domcontentloaded",
+      timeout: 30000,
+    });
+
+    // Generate PDF
+    const pdfBuffer = await page.pdf({
       format: "Letter",
       printBackground: true,
       margin: {
@@ -209,12 +233,10 @@ app.get("/api/equipment/:id/pdf", async (req, res) => {
         bottom: "0.3in",
         left: "0.3in",
       },
-    };
+    });
 
-    const file = { content: html };
-
-    // Generate PDF
-    const pdfBuffer = await htmlToPdf.generatePdf(file, options);
+    await browser.close();
+    browser = null;
 
     // Send PDF
     const filename = `Equipment_Report_${
@@ -226,6 +248,13 @@ app.get("/api/equipment/:id/pdf", async (req, res) => {
     res.end(pdfBuffer);
   } catch (error) {
     console.error("Error generating PDF:", error);
+    if (browser) {
+      try {
+        await browser.close();
+      } catch (e) {
+        console.error("Error closing browser:", e);
+      }
+    }
     res.status(500).json({ success: false, error: error.message });
   }
 });
