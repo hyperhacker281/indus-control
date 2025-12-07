@@ -198,19 +198,23 @@ app.get("/api/equipment/:id/pdf", async (req, res) => {
     // Generate HTML with data
     const html = template(data);
 
+    console.log("Calling Doppio API for PDF generation...");
+
     // Use Doppio API for PDF conversion
     const pdfResponse = await axios.post(
-      "https://api.doppio.sh/v1/render/pdf",
+      "https://api.doppio.sh/v1/render/pdf/sync",
       {
-        html: html,
         page: {
-          format: "Letter",
-          printBackground: true,
-          margin: {
-            top: "0.3in",
-            right: "0.3in",
-            bottom: "0.3in",
-            left: "0.3in",
+          html: html,
+          pdf: {
+            format: "Letter",
+            printBackground: true,
+            margin: {
+              top: "0.3in",
+              right: "0.3in",
+              bottom: "0.3in",
+              left: "0.3in",
+            },
           },
         },
       },
@@ -224,6 +228,8 @@ app.get("/api/equipment/:id/pdf", async (req, res) => {
       }
     );
 
+    console.log("PDF generated successfully, size:", pdfResponse.data.length);
+
     // Send PDF
     const filename = `Equipment_Report_${
       equipment.cr164_equipmentnumber || req.params.id
@@ -233,7 +239,10 @@ app.get("/api/equipment/:id/pdf", async (req, res) => {
     res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
     res.end(Buffer.from(pdfResponse.data));
   } catch (error) {
-    console.error("Error generating PDF:", error);
+    console.error("Error generating PDF:", error.message);
+    if (error.response) {
+      console.error("Doppio API error:", error.response.status, error.response.data);
+    }
     res.status(500).json({
       success: false,
       error: error.message,
