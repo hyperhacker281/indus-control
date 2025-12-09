@@ -193,4 +193,40 @@ export const equipmentService = {
   },
 };
 
+// History Card Service
+export const historyCardService = {
+  // Get history records for an equipment
+  getHistoryByEquipment: async (equipmentId) => {
+    try {
+      const response = await api.get(`/history/${equipmentId}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching history:", error);
+      throw error.response?.data || error.message;
+    }
+  },
+
+  // Download PDF from report file URL
+  downloadPDF: async (reportFileUrl, filename) => {
+    try {
+      if (!reportFileUrl) {
+        throw new Error("No report file URL provided");
+      }
+
+      // Create download link
+      const link = document.createElement("a");
+      link.href = reportFileUrl;
+      link.setAttribute("download", `${filename}.pdf`);
+      link.setAttribute("target", "_blank");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      return { success: true };
+    } catch (error) {
+      throw error.message || "Failed to download PDF";
+    }
+  },
+};
+
 export default api;
